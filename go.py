@@ -2,7 +2,9 @@
 
 import getopt
 import sys
+# import support
 import support.wave
+import support.em
 import glob
 import sklearn
 
@@ -37,17 +39,22 @@ if __name__ == "__main__":
     sys.exit(0)
   try:
     __wave_model = eval("support.%s.WaveHelper" % CFG_MODEL)
-  except:
+  except Exception as e:
     print("go.py: could not import WaveHelper from support.%s" % CFG_MODEL)
+    print(e)
     sys.exit(0)
   for fn in glob.glob("%s/*" % CFG_FOLDER):
     wh = __wave_model(fn)
     f = wh.extractFeatures()    # returns: an array of features
     l = wh.getLabel()           # returns: a single label per file
-    labelMap[i] = l
+    if l in labelMap.keys():
+      l_a = labelMap[l]
+    else:
+      labelMap[l] = i
+      l_a = i
+      i += 1
     featureArray += f
-    labelArray += [i] * len(f)
-    i += 1
+    labelArray += [l_a] * len(f)
   clf = sklearn.svm.SVC(gamma=0.001,C=100.)
   for f in featureArray:
     print(len(f))

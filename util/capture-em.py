@@ -9,7 +9,6 @@ from scipy.signal import butter,lfilter,freqz
 import tkinter as tk
 import numpy as np
 import sys
-import support
 import getopt
 import time
 
@@ -18,9 +17,9 @@ import matplotlib.pyplot as plt
 CONFIG_SAMPLECOUNT = 400000
 CONFIG_SAMPLERATE = 124999999
 CONFIG_CAPTURES = -1
-CONFIG_DISPLAY_SAMPLES = 50000
+CONFIG_DISPLAY_SAMPLES = 65000
 
-CONFIG_THRESHOLD = support.CONFIG_THRESHOLD
+CONFIG_THRESHOLD = 0.075
 CONFIG_BACKOFF = 0.1
 CONFIG_VRANGE = 0.2
 
@@ -111,7 +110,7 @@ class Application(tk.Frame):
       if CONFIG_SPECGRAM:
         self.mainPlot.specgram(data_DISPLAY,NFFT=1024,Fs=CONFIG_SAMPLERATE,noverlap=900)
       else:
-        self.mainPlot.plot(support.block_preprocess_function(data_DISPLAY))
+        self.mainPlot.plot(abs(data_DISPLAY))
       self.canvas.draw()
       self.canvas.flush_events()
       time.sleep(CONFIG_BACKOFF)
