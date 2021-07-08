@@ -6,6 +6,7 @@ import support
 import glob
 import sklearn
 import sklearn.svm
+import sklearn.neighbors
 
 def usage():
   print("-t / --train: train and test a single folder")
@@ -55,7 +56,8 @@ if __name__ == "__main__":
       i += 1
     featureArray += f
     labelArray += [l_a] * len(f)
-  clf = sklearn.svm.SVC(gamma=0.001,C=100.)
+  clf = sklearn.neighbors.KNeighborsClassifier()
+  # clf = sklearn.svm.SVC(gamma=0.001,C=100.)
   # for f in featureArray:
   #   print(len(f))
   print(labelArray)

@@ -46,19 +46,16 @@ class WaveHelper:
     self.sampleBuffer = butter_bandpass_filter(self.sampleBuffer,8000000,16000000,124999999,order=1)
     peaks,_ = scipy.signal.find_peaks(abs(self.sampleBuffer[65000:]),height=50,distance=4000)
     peaks = [peak + 65000 for peak in peaks]
-    # print(peaks)
-    # plt.plot(abs(self.sampleBuffer))
-    # plt.plot(peaks,[abs(self.sampleBuffer)[peak] for peak in peaks])
-    # plt.show()
     peakFeat = []
     peakVal = []
-    for i in range(0,10):
+    for i in range(0,5):
       if i < len(peaks):
         peakFeat.append(peaks[i])
         peakVal.append(abs(self.sampleBuffer)[peaks[i]])
       else:
         peakFeat.append(0)
         peakVal.append(0)
+    print([peakFeat + peakVal]) 
     return [peakFeat + peakVal]
 
 
