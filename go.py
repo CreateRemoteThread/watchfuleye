@@ -2,11 +2,10 @@
 
 import getopt
 import sys
-# import support
-import support.wave
-import support.em
+import support
 import glob
 import sklearn
+import sklearn.svm
 
 def usage():
   print("-t / --train: train and test a single folder")
@@ -38,6 +37,7 @@ if __name__ == "__main__":
     print("go.py: missing -f/--format argument.")
     sys.exit(0)
   try:
+    exec("import support.%s" % CFG_MODEL)
     __wave_model = eval("support.%s.WaveHelper" % CFG_MODEL)
   except Exception as e:
     print("go.py: could not import WaveHelper from support.%s" % CFG_MODEL)
@@ -56,8 +56,8 @@ if __name__ == "__main__":
     featureArray += f
     labelArray += [l_a] * len(f)
   clf = sklearn.svm.SVC(gamma=0.001,C=100.)
-  for f in featureArray:
-    print(len(f))
+  # for f in featureArray:
+  #   print(len(f))
   print(labelArray)
   feature_train,feature_test,label_train,label_test = sklearn.model_selection.train_test_split(featureArray,labelArray,test_size=0.2)
   clf.fit(feature_train,label_train)
