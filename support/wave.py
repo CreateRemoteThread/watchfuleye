@@ -15,8 +15,6 @@ import matplotlib.pyplot as plt
 SLICE_LEFT=3250
 SLICE_RIGHT=9000
 
-
-
 def butter_highpass(cutoff, fs, order=5):
   nyq = 0.5 * fs
   normal_cutoff = cutoff / nyq
@@ -63,10 +61,10 @@ class WaveHelper:
     # ghetto normalize
     self.sampleBuffer = self.sampleBuffer / np.max(np.abs(self.sampleBuffer))*1000
     # plt.specgram(self.sampleBuffer,NFFT=1024,Fs=44100,noverlap=900)
-    plt.plot(self.sampleBuffer,color="blue")
+    # plt.plot(self.sampleBuffer,color="blue")
     self.filt = butter_bandpass_filter(self.sampleBuffer,2500,15000,44100,order=1)
-    plt.plot(self.filt,color="red")
-    plt.show()
+    # plt.plot(self.filt,color="red")
+    # plt.show()
     self.filt_abs = abs(self.filt)
     self.fw.close()
     self.peakSlices = []
@@ -87,16 +85,16 @@ class WaveHelper:
   def findPeaks(self):
     peaks,peak_h = signal.find_peaks(self.filt_abs,200,distance=10000)
     self.peakSlices = []
-    plt.plot(self.filt)
+    # plt.plot(self.filt)
     for peak in peaks:
       if peak-SLICE_LEFT < 0 or peak + SLICE_RIGHT > len(self.filt):
         pass
       else:
-        plt.axvline(x=peak-SLICE_LEFT)
-        plt.axvline(x=peak+SLICE_RIGHT)
+        # plt.axvline(x=peak-SLICE_LEFT)
+        # plt.axvline(x=peak+SLICE_RIGHT)
         self.peakSlices.append(self.filt[peak-SLICE_LEFT:peak+SLICE_RIGHT])
     # print(len(self.peakSlices))
-    plt.show()
+    # plt.show()
     return peaks
 
   def extractFeatures(self):
@@ -105,9 +103,9 @@ class WaveHelper:
     self.mfccSlices = []
     for i in range(0,len(self.peakSlices)):
       spec = mfcc(y=self.peakSlices[i],sr=44100,n_mfcc=16,n_fft=220,hop_length=110)
-      plt.plot(spec.flatten(),color="blue")
+      # plt.plot(spec.flatten(),color="blue")
       self.mfccSlices.append(list(spec.flatten()))
-    plt.show()
+    # plt.show()
     return self.mfccSlices
 
   def __del__(self):
