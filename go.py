@@ -5,7 +5,8 @@ import sys
 import support
 import glob
 import sklearn
-import sklearn.svm
+# import sklearn.svm
+import sklearn.linear_model
 import sklearn.neighbors
 
 def usage():
@@ -56,7 +57,8 @@ if __name__ == "__main__":
       i += 1
     featureArray += f
     labelArray += [l_a] * len(f)
-  clf = sklearn.neighbors.KNeighborsClassifier()
+  clf = sklearn.linear_model.LogisticRegression()
+  # clf = sklearn.neighbors.KNeighborsClassifier()
   # clf = sklearn.svm.SVC(gamma=0.001,C=100.)
   # for f in featureArray:
   #   print(len(f))
@@ -64,6 +66,6 @@ if __name__ == "__main__":
   feature_train,feature_test,label_train,label_test = sklearn.model_selection.train_test_split(featureArray,labelArray,test_size=0.2)
   clf.fit(feature_train,label_train)
   print("PREDICTION:")
-  print(clf.predict(feature_test))
+  print(list(clf.predict(feature_test)))
   print("LABEL_TEST:")
   print(label_test) 

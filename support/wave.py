@@ -60,8 +60,9 @@ class WaveHelper:
         sys.exit(0)
     # ghetto normalize
     self.sampleBuffer = self.sampleBuffer / np.max(np.abs(self.sampleBuffer))*1000
+    # plt.specgram(self.sampleBuffer,NFFT=1024,Fs=44100,noverlap=900)
     plt.plot(self.sampleBuffer,color="blue")
-    self.filt = butter_highpass_filter(self.sampleBuffer,4000,44100,order=1)
+    self.filt = butter_bandpass_filter(self.sampleBuffer,2500,15000,44100,order=1)
     plt.plot(self.filt,color="red")
     plt.show()
     self.filt_abs = abs(self.filt)
@@ -79,7 +80,6 @@ class WaveHelper:
 
   def findPeaks_welch(self):
     psd = signal.welch(self.sampleBuffer,fs=self.n_fr,window="blackman",nfft=256)
-    plt.plot(psd)
     plt.show()
 
   def findPeaks(self):
@@ -93,7 +93,7 @@ class WaveHelper:
         plt.axvline(x=peak-SLICE_LEFT)
         plt.axvline(x=peak+SLICE_RIGHT)
         self.peakSlices.append(self.filt[peak-SLICE_LEFT:peak+SLICE_RIGHT])
-    print(len(self.peakSlices))
+    # print(len(self.peakSlices))
     plt.show()
     return peaks
 
@@ -103,9 +103,10 @@ class WaveHelper:
     self.mfccSlices = []
     for i in range(0,len(self.peakSlices)):
       spec = mfcc(y=self.peakSlices[i],sr=44100,n_mfcc=16,n_fft=220,hop_length=110)
+      plt.plot(spec.flatten(),color="blue")
       self.mfccSlices.append(list(spec.flatten()))
+    plt.show()
     return self.mfccSlices
-      # plt.plot(spec.flatten(),color="blue")
 
   def __del__(self):
     print("WaveHelper destroyed: %s" % self.wave_fn)
