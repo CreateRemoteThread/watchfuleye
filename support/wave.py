@@ -4,16 +4,18 @@ import os
 import sys
 import wave
 import numpy as np
-import librosa
+import librosa_nollvm
 import struct
 from scipy import signal
 from scipy.signal import butter,lfilter
-from librosa.feature import mfcc
+from librosa_nollvm.feature import mfcc
 
 import matplotlib.pyplot as plt
 
 SLICE_LEFT=3250
 SLICE_RIGHT=9000
+
+
 
 def butter_highpass(cutoff, fs, order=5):
   nyq = 0.5 * fs
