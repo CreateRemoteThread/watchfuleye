@@ -47,8 +47,8 @@ class WaveHelper:
     self.n_fr = self.fw.getframerate()
     self.n_fn = self.fw.getnframes()
     print("WaveHelper initialized: %s" % wave_fn)
-    print("- Channels: %d" % self.n_channels)
-    print("- Sample Width: %d" % self.n_sampw)
+    # print("- Channels: %d" % self.n_channels)
+    # print("- Sample Width: %d" % self.n_sampw)
     self.sampleBuffer = []
     for framecount in range(0,self.n_fn):
       dx = self.fw.readframes(1)
@@ -82,17 +82,23 @@ class WaveHelper:
     psd = signal.welch(self.sampleBuffer,fs=self.n_fr,window="blackman",nfft=256)
     plt.show()
 
-  def findPeaks(self):
-    peaks,peak_h = signal.find_peaks(self.filt_abs,200,distance=10000)
+  def findPeaks(self,plot_helper=None):
+    peaks,peak_h = signal.find_peaks(self.filt_abs,100,distance=10000)
     self.peakSlices = []
     # plt.plot(self.filt)
     for peak in peaks:
       if peak-SLICE_LEFT < 0 or peak + SLICE_RIGHT > len(self.filt):
         pass
       else:
-        # plt.axvline(x=peak-SLICE_LEFT)
-        # plt.axvline(x=peak+SLICE_RIGHT)
-        self.peakSlices.append(self.filt[peak-SLICE_LEFT:peak+SLICE_RIGHT])
+        if plot_helper is not None:
+          # plot_helper.plot([peak-SLICE_LEFT],[self.sampleBuffer[peak-SLICE_LEFT]],marker='x')
+          # plot_helper.plot([peak+SLICE_RIGHT],[self.sampleBuffer[peak-SLICE_RIGHT]],marker='x')
+          plot_helper.axvline(x=peak-SLICE_LEFT)
+          plot_helper.axvline(x=peak+SLICE_RIGHT)
+        normalized_slice = self.filt[peak-SLICE_LEFT:peak+SLICE_RIGHT]
+        normalized_slice = normalized_slice / np.max(np.abs(normalized_slice))*1000
+        self.peakSlices.append(normalized_slice)
+        # self.peakSlices.append(self.filt[peak-SLICE_LEFT:peak+SLICE_RIGHT])
     # print(len(self.peakSlices))
     # plt.show()
     return peaks

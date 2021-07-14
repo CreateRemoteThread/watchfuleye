@@ -38,7 +38,7 @@ class WaveHelper:
     else:
       return wfn_base.split(".")[0]
 
-  def findPeaks(self):
+  def findPeaks(self,plot_helper = None):
     return self.sampleBuffer
 
   def extractFeatures(self):

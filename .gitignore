@@ -1,3 +1,9 @@
+*.m4a
+*.wav
+
+**/*.m4a
+**/*.wav
+
 training/**/*
 !training/README.md
 
