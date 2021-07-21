@@ -84,6 +84,7 @@ class WaveHelper:
 
   def findPeaks(self,plot_helper=None):
     peaks,peak_h = signal.find_peaks(self.filt_abs,100,distance=10000)
+    self.peakPoints = peaks
     self.peakSlices = []
     # plt.plot(self.filt)
     for peak in peaks:
