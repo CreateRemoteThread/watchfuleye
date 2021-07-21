@@ -116,7 +116,7 @@ class WaveHelper:
     return self.mfccSlices
 
   def __del__(self):
-    print("WaveHelper destroyed: %s" % self.wave_fn)
+    pass
 
 if __name__ == "__main__":
   print("wave.py: this is not meant to be called directly")

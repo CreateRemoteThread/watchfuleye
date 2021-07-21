@@ -5,7 +5,6 @@ import sys
 import support
 import glob
 import sklearn
-# import sklearn.svm
 import sklearn.linear_model
 import sklearn.neighbors
 
@@ -14,11 +13,16 @@ def unmapProba(probs,labelmap):
   for l in labelmap.keys():
     li = labelmap[l]
     label_unmap[li] = l
+  probaArray = []
   for prob_l in probs:
+    this_letter_array = []
     top_args = prob_l.argsort()[::-1][:3]
     print("Guessing Character:")
     for ti in top_args:
       print("%s : %f" % (label_unmap[ti],prob_l[ti]))
+      this_letter_array.append(label_unmap[ti])
+    probaArray.append(this_letter_array)
+  return probaArray
 
 def unmapLabel(labels,labelmap):
   label_unmap = {}
@@ -30,22 +34,43 @@ def unmapLabel(labels,labelmap):
 def usage():
   print("-t / --train: train and test a single folder")
   print("-f / --format: specify a feature extraction helper")
+  print("-h / --holdout: specify a holdout dataset")
 
 CFG_MODEL = None
 CFG_FOLDER = None
+CFG_HOLDOUT = None
+CFG_WORDLIST = None
 
 i = 0
 labelMap = {}
 labelArray = []
 featureArray = []
 
-CFG_HOLDOUT = None
+def closestMatch(proba_top3,wordlist):
+  print("Searching closest words from '%s'" % wordlist)
+  f = open(wordlist)
+  len_proba_top3 = len(proba_top3)
+  for wl in f.readlines():
+    wl_ = wl.rstrip()
+    if len(wl_) != len_proba_top3:
+      continue
+    skipFlag = False
+    for i in range(0,len(wl_)):
+      if wl_[i] not in proba_top3[i]:
+        skipFlag = True
+        break
+    if skipFlag:
+      continue
+    else:
+      print(wl_)
+  f.close()
+    
 
 if __name__ == "__main__":
   if len(sys.argv) < 2:
     usage()
     sys.exit(0)
-  opts,args = getopt.getopt(sys.argv[1:],"m:f:h:",["model=","folder=","holdout="])
+  opts,args = getopt.getopt(sys.argv[1:],"m:f:h:w:",["model=","folder=","holdout=","wordlist="])
   for arg,val in opts:
     if arg in ("-m","--model"):
       CFG_MODEL = val
@@ -53,6 +78,8 @@ if __name__ == "__main__":
       CFG_HOLDOUT = val
     elif arg in ("-f","--folder"):
       CFG_FOLDER = val
+    elif arg in ("-w","--wordlist"):
+      CFG_WORDLIST = val
   # todo: implement mode selector
   if CFG_MODEL is None:
     print("go.py: missing -m/--model argument. must be one of wave,em") 
@@ -88,17 +115,17 @@ if __name__ == "__main__":
     feature_train = featureArray
     label_train = labelArray
     wh = __wave_model(CFG_HOLDOUT)
-    # warnings.smplefilter("ignore")
     f = wh.extractFeatures()
     feature_test = f
   clf.fit(feature_train,label_train)
   print("PREDICTION:")
   l = list(clf.predict(feature_test))
   lf = clf.predict_proba(feature_test)
-  unmapProba(lf,labelMap)
-  # print(lf)
   unmapped = unmapLabel(l,labelMap)
   print(unmapped)
+  prob_array = unmapProba(lf,labelMap)
+  if CFG_WORDLIST is not None and CFG_HOLDOUT is not None:
+    closestMatch(prob_array,CFG_WORDLIST)
   if CFG_HOLDOUT is None:
     print("LABEL_TEST:")
     unmapped_test = unmapLabel(label_test,labelMap)
