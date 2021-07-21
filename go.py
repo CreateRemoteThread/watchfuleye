@@ -4,9 +4,11 @@ import getopt
 import sys
 import support
 import glob
+import numpy as np
 import sklearn
 import sklearn.linear_model
 import sklearn.neighbors
+import warnings
 
 def unmapProba(probs,labelmap):
   label_unmap = [None] * len(labelmap.keys())
@@ -14,10 +16,12 @@ def unmapProba(probs,labelmap):
     li = labelmap[l]
     label_unmap[li] = l
   probaArray = []
+  i = 0
   for prob_l in probs:
     this_letter_array = []
     top_args = prob_l.argsort()[::-1][:3]
-    print("Guessing Character:")
+    print("Extracting character probability for slot %d" % i)
+    i += 1
     for ti in top_args:
       print("%s : %f" % (label_unmap[ti],prob_l[ti]))
       this_letter_array.append(label_unmap[ti])
@@ -35,11 +39,14 @@ def usage():
   print("-t / --train: train and test a single folder")
   print("-f / --format: specify a feature extraction helper")
   print("-h / --holdout: specify a holdout dataset")
+  print("-w / --wordlist: specify wordlist for closest match guessing")
+  print("-d / --demo: run with extra bells and whistles")
 
 CFG_MODEL = None
 CFG_FOLDER = None
 CFG_HOLDOUT = None
 CFG_WORDLIST = None
+CFG_DEMO = False
 
 i = 0
 labelMap = {}
@@ -64,13 +71,13 @@ def closestMatch(proba_top3,wordlist):
     else:
       print(wl_)
   f.close()
-    
 
 if __name__ == "__main__":
   if len(sys.argv) < 2:
     usage()
     sys.exit(0)
-  opts,args = getopt.getopt(sys.argv[1:],"m:f:h:w:",["model=","folder=","holdout=","wordlist="])
+  sw = np.testing.suppress_warnings()
+  opts,args = getopt.getopt(sys.argv[1:],"m:f:h:w:d",["model=","folder=","holdout=","wordlist=","demo"])
   for arg,val in opts:
     if arg in ("-m","--model"):
       CFG_MODEL = val
@@ -80,6 +87,9 @@ if __name__ == "__main__":
       CFG_FOLDER = val
     elif arg in ("-w","--wordlist"):
       CFG_WORDLIST = val
+    elif arg in ("-d","--demo"):
+      import matplotlib.pyplot as plt
+      CFG_DEMO = True
   # todo: implement mode selector
   if CFG_MODEL is None:
     print("go.py: missing -m/--model argument. must be one of wave,em") 
@@ -94,9 +104,13 @@ if __name__ == "__main__":
     print("go.py: could not import WaveHelper from support.%s" % CFG_MODEL)
     print(e)
     sys.exit(0)
+  print("Constructing ML Classifier...")
   for fn in glob.glob("%s/*" % CFG_FOLDER):
     wh = __wave_model(fn)
-    f = wh.extractFeatures()    # returns: an array of features
+    with warnings.catch_warnings():
+      if CFG_DEMO:
+        warnings.simplefilter("ignore")
+      f = wh.extractFeatures()    # returns: an array of features
     l = wh.getLabel()           # returns: a single label per file
     if l in labelMap.keys():
       l_a = labelMap[l]
@@ -117,7 +131,10 @@ if __name__ == "__main__":
     wh = __wave_model(CFG_HOLDOUT)
     f = wh.extractFeatures()
     feature_test = f
-  clf.fit(feature_train,label_train)
+  with warnings.catch_warnings():
+    if CFG_DEMO:
+      warnings.simplefilter("ignore")
+    clf.fit(feature_train,label_train)
   print("PREDICTION:")
   l = list(clf.predict(feature_test))
   lf = clf.predict_proba(feature_test)
